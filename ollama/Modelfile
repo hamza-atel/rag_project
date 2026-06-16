@@ -1,0 +1,4 @@
+FROM ../models/Gemma-4-E4B-Uncensored-HauhauCS-Aggressive-Q4_K_P.gguf
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9

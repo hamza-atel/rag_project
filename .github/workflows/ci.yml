@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  RAG_DB: rag_test
+  RAG_DB_USER: postgres
+  RAG_DB_PASS: postgres
+  RAG_DB_HOST: localhost
+  RAG_DB_PORT: 5432
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rag_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Apply database schema
+        run: |
+          psql -d $RAG_DB -U $RAG_DB_USER -h $RAG_DB_HOST -p $RAG_DB_PORT -f db/schema.sql
+      - name: Run unit tests
+        run: pytest tests/ -v
+      - name: Run smoke test (store/retrieve)
+        run: |
+          echo "CI smoke test content" > /tmp/ci_test.txt
+          python -m rag.store --file /tmp/ci_test.txt --title "CI Test"
+          python -m rag.retrieve --query "CI smoke test" --top-k 1 | grep "CI smoke test content"

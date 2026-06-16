@@ -1,0 +1,29 @@
+# Python venv
+rag_env/
+
+# Bytecode
+*.pyc
+__pycache__/
+
+# Local env
+.env
+
+# Large model files (optional: keep models out of repo)
+models/
+*.gguf
+*.ggml
+*.pt
+*.bin
+
+# DB dumps
+*.sql
+/backups/
+
+# Editor files
+.vscode/
+.idea/
+.DS_Store
+
+# Git LFS pointer files (if using LFS)
+*.lfs
+EOF
